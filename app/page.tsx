@@ -34,8 +34,17 @@ export default function Home() {
       <ExampleRecipes onSelectImage={handleImageUpload} />
       <ImageUpload onUpload={handleImageUpload} />
       {isLoading && <p className="text-center font-semibold">Analyzing image and generating recipe...</p>}
-      {recipe && <Recipe recipe={recipe} />}
-      {groceryList.length > 0 && <GroceryList items={groceryList} />}
+      
+      {(recipe || groceryList.length > 0) && (
+        <div className="grid gap-6 md:grid-cols-2 mt-6 auto-rows-fr">
+          <div className="h-full">
+            {recipe && <Recipe recipe={recipe} />}
+          </div>
+          <div className="h-full">
+            {groceryList.length > 0 && <GroceryList items={groceryList} />}
+          </div>
+        </div>
+      )}
     </main>
   )
 }

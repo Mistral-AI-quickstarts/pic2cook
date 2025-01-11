@@ -15,7 +15,7 @@ export function GroceryList({ items }: GroceryListProps) {
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className="bg-white shadow-md rounded-lg p-6 h-full">
       <h2 className="text-xl font-semibold mb-4">Grocery List</h2>
       <ul>
         {items.map((item, index) => (

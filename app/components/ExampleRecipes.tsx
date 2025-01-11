@@ -55,13 +55,11 @@ export function ExampleRecipes({ onSelectImage }: ExampleRecipesProps) {
           <div key={recipe.id} className="bg-white shadow-md rounded-lg overflow-hidden">
             <Image
               src={recipe.image}
-              alt={recipe.name}
               width={600}
               height={400}
               className="w-full h-48 object-cover"
             />
             <div className="p-4">
-              <h3 className="font-semibold mb-2">{recipe.name}</h3>
               <Button onClick={() => handleImageSelect(recipe.image)}>
                 Use This Image
               </Button>
