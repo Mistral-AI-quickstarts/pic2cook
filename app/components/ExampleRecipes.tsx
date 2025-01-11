@@ -49,7 +49,7 @@ export function ExampleRecipes({ onSelectImage }: ExampleRecipesProps) {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Example Recipes</h2>
+      <h2 className="text-xl font-semibold mb-4">Example Pictures</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {exampleRecipes.map((recipe) => (
           <div key={recipe.id} className="bg-white shadow-md rounded-lg overflow-hidden">
