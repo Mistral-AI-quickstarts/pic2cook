@@ -80,6 +80,19 @@ export default function Home() {
         )}
         {imageSource === 'example' && (recipe || groceryList.length > 0) && <ResultsSection />}
       </div>
+
+      <footer className="mt-16 text-center text-sm text-gray-500">
+        Powered by{' '}
+        <a 
+          href="https://mistral.ai" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          Mistral AI
+        </a>
+        {' '}Pixtral 12B
+      </footer>
     </main>
   )
 }
