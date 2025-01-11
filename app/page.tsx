@@ -31,8 +31,10 @@ export default function Home() {
   return (
     <main className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Recipe Generator</h1>
-      <ExampleRecipes onSelectImage={handleImageUpload} />
+      
       <ImageUpload onUpload={handleImageUpload} />
+      <ExampleRecipes onSelectImage={handleImageUpload} />
+      
       {isLoading && <p className="text-center font-semibold">Analyzing image and generating recipe...</p>}
       
       {(recipe || groceryList.length > 0) && (
