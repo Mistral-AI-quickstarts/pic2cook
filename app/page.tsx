@@ -69,14 +69,14 @@ export default function Home() {
       
       <ImageUpload onUpload={handleImageUpload} />
       {isLoading && imageSource === 'upload' && (
-        <p className="text-center font-semibold">Analyzing image and generating recipe...</p>
+        <p className="text-center font-semibold">Analyzing image and generating recipe & grocery list...</p>
       )}
       {imageSource === 'upload' && (recipe || groceryList.length > 0) && <ResultsSection />}
       
       <div className="mt-12">
         <ExampleRecipes onSelectImage={handleExampleSelect} />
         {isLoading && imageSource === 'example' && (
-          <p className="text-center font-semibold">Analyzing image and generating recipe...</p>
+          <p className="text-center font-semibold">Analyzing image and generating recipe & grocery list...</p>
         )}
         {imageSource === 'example' && (recipe || groceryList.length > 0) && <ResultsSection />}
       </div>
