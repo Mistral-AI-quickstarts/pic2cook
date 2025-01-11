@@ -1,6 +1,6 @@
 'use server'
 
-import { Mistral } from "@mistralai/mistralai"
+import { Mistral } from '@mistralai/mistralai'
 
 export async function analyzeImageAndGenerateRecipe(imageData: string) {
   const apiKey = process.env.MISTRAL_API_KEY;
