@@ -1,18 +1,17 @@
 'use server'
 
-import { generateText } from 'ai'
 import { Mistral } from "@mistralai/mistralai"
-import { log } from 'console';
-
-const apiKey = process.env["MISTRAL_API_KEY"];
-const client = new Mistral({ apiKey: apiKey });
 
 export async function analyzeImageAndGenerateRecipe(imageData: string) {
-  if (!process.env.MISTRAL_API_KEY) {
-    throw new Error('MISTRAL_API_KEY is not set in the environment variables')
+  const apiKey = process.env.MISTRAL_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('Configuration error: Please check environment variables')
   }
 
   try {
+    const client = new Mistral({ apiKey });
+    
     const response = await client.chat.complete({
       model: "pixtral-12b",
       messages: [
@@ -45,7 +44,7 @@ export async function analyzeImageAndGenerateRecipe(imageData: string) {
     })
 
     if (!response.choices) {
-      throw new Error('No text generated from the AI model')
+      throw new Error('No response received from AI model')
     }
 
     console.log(response.choices[0].message.content)
@@ -73,7 +72,8 @@ export async function analyzeImageAndGenerateRecipe(imageData: string) {
     }
   } catch (error) {
     console.error('Error in analyzeImageAndGenerateRecipe:', error)
-    throw error
+    // Sanitize error message for production
+    throw new Error('Failed to generate recipe. Please try again.')
   }
 }
 
