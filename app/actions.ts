@@ -1,37 +1,67 @@
 'use server'
 
 import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import { Mistral } from "@mistralai/mistralai"
+import { log } from 'console';
+
+const apiKey = process.env["MISTRAL_API_KEY"];
+const client = new Mistral({ apiKey: apiKey });
 
 export async function analyzeImageAndGenerateRecipe(imageData: string) {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is not set in the environment variables')
+  if (!process.env.MISTRAL_API_KEY) {
+    throw new Error('MISTRAL_API_KEY is not set in the environment variables')
   }
 
   try {
-    const response = await generateText({
-      model: openai('gpt-4-vision-preview'),
+    const response = await client.chat.complete({
+      model: "pixtral-12b",
       messages: [
         {
           role: 'user',
           content: [
-            { type: 'text', text: 'Analyze this image and generate a recipe based on the main ingredients you see. Also, provide a list of groceries needed for the recipe.' },
-            { type: 'image_url', image_url: { url: imageData } }
+            { type: 'text', text: `You are a helpful cooking assistant. Given an image or description of food, provide a dish name, recipe and grocery list in JSON format.
+        The response should be a valid JSON object with three main keys: "dishName", "recipe" and "groceryList".
+        The dishName should be a string.
+        The recipe should be a formatted string with clear sections for:
+          - Ingredients (with quantities)
+          - Instructions (numbered steps)
+          - Cooking Time
+        Each section should be clearly labeled and separated by line breaks.
+        The groceryList should be an array of items needed, each including quantity (e.g., "2 cups rice", "3 cloves garlic", "1 large onion").` },
+            { type: 'image_url', imageUrl: imageData }
           ],
         },
       ],
+      response_format: {type: 'json_object'},
     })
 
-    if (!response.text) {
+    if (!response.choices) {
       throw new Error('No text generated from the AI model')
     }
 
-    // Parse the response to extract recipe and grocery list
-    const parts = response.text.split('Grocery List:')
-    const recipe = parts[0].trim()
-    const groceryList = parts[1] ? parts[1].trim().split('\n').map(item => item.trim().replace(/^-\s*/, '')) : []
-
-    return { recipe, groceryList }
+    console.log(response.choices[0].message.content)
+    // Clean and parse the JSON response
+    const rawContent = response.choices[0].message.content
+      .replace(/```json\n/, '')  // Remove opening ```json
+      .replace(/\n```$/, '')     // Remove closing ```
+      .replace(/[\n\r\t]/g, ' ') // Remove newlines, carriage returns, tabs
+      .replace(/\s+/g, ' ')      // Replace multiple spaces with single space
+      .trim();                   // Remove leading/trailing whitespace
+    
+    try {
+      const content = JSON.parse(rawContent);
+      
+      return {
+        dishName: content.dishName,
+        recipe: content.recipe,
+        groceryList: Array.isArray(content.groceryList) 
+          ? content.groceryList
+          : [content.groceryList.toString()]
+      }
+    } catch (jsonError) {
+      console.error('Error parsing JSON:', rawContent)
+      throw jsonError
+    }
   } catch (error) {
     console.error('Error in analyzeImageAndGenerateRecipe:', error)
     throw error
