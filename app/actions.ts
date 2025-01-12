@@ -22,7 +22,7 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     }
 
     const response = await client.chat.complete({
-      model: "pixtral-12b",
+      model: "pixtral-large-latest",
       messages: [
         {
           role: 'user',
