@@ -70,6 +70,20 @@ export default function Home() {
     try {
       // Pass false for isUserUpload to use environment API key
       const result = await analyzeImageAndGenerateRecipe(imageData, undefined, false)
+      console.log('API Response:', result);
+      
+      if ('error' in result) {
+        console.error('API Error:', result.error);
+        alert(result.error)
+        return
+      }
+      
+      if (!result.recipe || !result.groceryList) {
+        console.error('Invalid result structure:', result);
+        alert('Failed to generate recipe. Please try again.')
+        return
+      }
+      
       setRecipe(result.recipe)
       setGroceryList(result.groceryList)
     } catch (error) {

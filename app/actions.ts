@@ -79,8 +79,14 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
       .replace(/\\\s*/g, '')     // Remove escaped whitespace
       .trim();
     
+    // Log the cleaned content before parsing
+    console.log('Cleaned content:', rawContent);
+    
     try {
       const content = JSON.parse(rawContent);
+      
+      // Log the parsed content
+      console.log('Parsed content:', content);
       
       // Validate the required fields exist
       if (!content.recipe || !content.dishName || !content.groceryList) {
@@ -88,15 +94,22 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
         return { error: 'Invalid response format from AI model' }
       }
       
-      return {
+      // Create the return object
+      const result = {
         dishName: content.dishName,
         recipe: content.recipe,
         groceryList: Array.isArray(content.groceryList) 
           ? content.groceryList
           : [content.groceryList.toString()]
-      }
+      };
+      
+      // Log the final result
+      console.log('Final result:', result);
+      
+      return result;
     } catch (jsonError) {
       console.error('Error parsing JSON:', rawContent)
+      console.error('Parse error details:', jsonError)
       return { error: 'Failed to parse AI response' }
     }
   } catch (error) {
