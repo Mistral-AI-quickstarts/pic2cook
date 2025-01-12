@@ -129,12 +129,12 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-      <main className="container mx-auto p-4">
-        <header className="flex justify-between items-center mb-8">
+      <main className="container mx-auto p-4 max-w-6xl">
+        <header className="flex justify-between items-center mb-12">
           <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-primary mb-2">Pic2Cook</h1>
-            <p className="text-lg text-gray-600">
-              Snap a photo of any food and instantly get a detailed recipe and grocery list
+            <h1 className="text-5xl font-bold text-primary mb-3">Pic2Cook</h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Transform any food picture into a detailed recipe and grocery list instantly
             </p>
           </div>
           <div className="absolute right-8 top-8">
@@ -142,7 +142,7 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="relative">
+        <div className="relative rounded-2xl overflow-hidden shadow-lg">
           <ImageUpload 
             onUpload={handleImageUpload}
             preview={preview}
@@ -150,51 +150,91 @@ export default function Home() {
             setError={setError}
           />
           {!session && (
-            <div className="absolute inset-0 bg-black/5 backdrop-blur-[2px] flex items-center justify-center">
-              <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                <p className="text-lg mb-4">
-                  Sign in and add your Mistral API key to analyze your own pictures
-                </p>
-                <Button onClick={() => signIn(undefined, { callbackUrl: '/' })}>
-                  Sign In
-                </Button>
+            <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/40 to-black/50 backdrop-blur-[1px] flex items-center justify-center p-4">
+              <div className="bg-white/95 p-5 rounded-xl shadow-xl text-center max-w-[280px] mx-auto backdrop-blur-xl border border-white/20">
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-primary">Upload Your Own Pictures</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <ol className="text-left space-y-2 list-none text-sm">
+                      {[
+                        'Sign in to your account',
+                        'Add your Mistral API key',
+                        'Start uploading pictures!'
+                      ].map((step, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <span className="flex-none w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium text-xs">
+                            {i + 1}
+                          </span>
+                          <span className="text-gray-600">{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                    <Button 
+                      onClick={() => signIn(undefined, { callbackUrl: '/' })}
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
+                      size="sm"
+                    >
+                      Sign In to Continue
+                    </Button>
+                    <p className="text-xs text-gray-500">
+                      Try example pictures below without signing in
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
 
         {isLoading && imageSource === 'upload' && (
-          <p className="text-center font-semibold">
-            Analyzing image and generating recipe & grocery list...
-          </p>
+          <div className="mt-8 text-center">
+            <p className="text-lg font-medium text-primary animate-pulse">
+              Analyzing image and generating recipe & grocery list...
+            </p>
+          </div>
         )}
 
         {error && imageSource === 'upload' && (
-          <div className="mt-6 text-center">
-            <p className="text-red-500 mb-4">{error}</p>
+          <div className="mt-8 text-center">
+            <p className="text-red-500 font-medium bg-red-50 py-3 px-4 rounded-lg inline-block">
+              {error}
+            </p>
           </div>
         )}
 
         {imageSource === 'upload' && !error && (recipe || groceryList.length > 0) && (
-          <ResultsSection />
+          <div className="mt-8">
+            <ResultsSection />
+          </div>
         )}
         
-        <div className="mt-12">
-          <h2 className="text-xl font-semibold mb-4">Try with Example Pictures</h2>
+        <div className="mt-16 space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-primary mb-2">Try Example Pictures</h2>
+            <p className="text-gray-600">No sign-in required - see how it works!</p>
+          </div>
           <ExampleRecipes onSelectImage={handleExampleSelect} />
           {isLoading && imageSource === 'example' && (
-            <p className="text-center font-semibold">Analyzing image and generating recipe & grocery list...</p>
+            <p className="text-lg font-medium text-primary text-center animate-pulse">
+              Analyzing image and generating recipe & grocery list...
+            </p>
           )}
-          {imageSource === 'example' && (recipe || groceryList.length > 0) && <ResultsSection />}
+          {imageSource === 'example' && (recipe || groceryList.length > 0) && (
+            <div className="mt-8">
+              <ResultsSection />
+            </div>
+          )}
         </div>
 
-        <footer className="mt-16 text-center text-sm text-gray-500">
+        <footer className="mt-24 pb-8 text-center text-sm text-gray-500 border-t pt-8">
           Powered by{' '}
           <a 
             href="https://mistral.ai" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-primary hover:underline"
+            className="text-primary hover:underline font-medium"
           >
             Mistral AI
           </a>

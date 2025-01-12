@@ -73,29 +73,53 @@ export function ImageUpload({ onUpload, preview, setPreview, setError }: ImageUp
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-        ${isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300'}
-        ${!session ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary hover:bg-primary/5'}`}
+      className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all
+        min-h-[280px] flex flex-col justify-center items-center
+        bg-gradient-to-b from-white to-gray-50
+        ${isDragActive ? 'border-primary bg-primary/5 scale-[0.99] border-2' : 'border-gray-200 hover:border-primary/50'}
+        ${!session ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:from-primary/5'}`}
     >
       <input {...getInputProps()} />
-      <div className="space-y-4">
-        <div className="text-lg">
-          <p>Drop an image here, or click to select</p>
+      <div className="space-y-6 max-w-2xl w-full">
+        <div className="space-y-2">
+          <p className="text-xl font-medium text-gray-700">
+            Drop an image here, or click to select
+          </p>
         </div>
-        {preview && (
-          <div className="mt-4">
+        {preview ? (
+          <div className="relative group">
             <img
               src={preview}
               alt="Preview"
-              className="max-h-64 mx-auto rounded-lg"
+              className="max-h-36 mx-auto rounded-xl shadow-md object-contain bg-white p-2"
             />
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 bg-white/50">
+            <div className="flex flex-col items-center gap-3">
+              <svg
+                className="w-10 h-10 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <p className="text-gray-500 text-sm">JPEG, PNG, WebP</p>
+            </div>
           </div>
         )}
         <div className="flex justify-center gap-4">
           <Button
             type="button"
             disabled={!session}
-            className="mt-4"
+            size="lg"
+            className="font-medium"
             onClick={(e) => {
               e.stopPropagation()
               if (!hasApiKey && session) {
@@ -113,7 +137,9 @@ export function ImageUpload({ onUpload, preview, setPreview, setError }: ImageUp
           {preview && (
             <Button
               type="button"
-              className="mt-4"
+              size="lg"
+              variant="outline"
+              className="font-medium"
               onClick={(e) => {
                 e.stopPropagation()
                 if (preview) onUpload(preview)
