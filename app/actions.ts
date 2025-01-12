@@ -76,6 +76,7 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     // Clean and parse the JSON response
     const rawContent = response.choices[0].message.content
       .replace(/^[\s\S]*?({[\s\S]*})[\s\S]*$/, '$1') // Extract JSON object
+      .replace(/\\\s*/g, '')     // Remove escaped whitespace
       .trim();
     
     try {
