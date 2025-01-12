@@ -44,6 +44,10 @@ export function UserMenu() {
       localStorage.setItem('mistral_api_key', apiKey)
       setHasApiKey(true)
       setSuccess('API key saved successfully')
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('mistralApiKeyUpdated'))
+      
       setTimeout(() => {
         setIsOpen(false)
         setSuccess('')

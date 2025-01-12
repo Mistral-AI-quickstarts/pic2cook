@@ -18,6 +18,8 @@ export default function Home() {
   const [groceryList, setGroceryList] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [imageSource, setImageSource] = useState<'upload' | 'example' | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleImageUpload = async (imageData: string) => {
     if (!session) {
@@ -25,7 +27,6 @@ export default function Home() {
       return
     }
 
-    // Get user's API key for personal uploads
     const userApiKey = localStorage.getItem('mistral_api_key')
     if (!userApiKey) {
       alert('Please add your Mistral API key in your profile to upload pictures')
@@ -35,22 +36,23 @@ export default function Home() {
     setIsLoading(true)
     setRecipe('')
     setGroceryList([])
+    setError(null)
     setImageSource('upload')
     
     try {
       const result = await analyzeImageAndGenerateRecipe(
         imageData,
         userApiKey,
-        true // This is a user upload
+        true
       )
       setRecipe(result.recipe)
       setGroceryList(result.groceryList)
     } catch (error) {
       console.error('Error in handleImageUpload:', error)
       if (error instanceof Error && error.message.includes('API key')) {
-        alert('There was an issue with your API key. Please check it in your profile.')
+        setError('There was an issue with your API key. Please check it in your profile.')
       } else {
-        alert(error instanceof Error ? error.message : 'An unknown error occurred. Please try again.')
+        setError(error instanceof Error ? error.message : 'An unexpected error occurred')
       }
     } finally {
       setIsLoading(false)
@@ -75,13 +77,48 @@ export default function Home() {
     }
   }
 
+  const handleRerun = async () => {
+    if (!preview) return
+    
+    const userApiKey = localStorage.getItem('mistral_api_key')
+    if (!userApiKey) {
+      alert('Please add your Mistral API key in your profile to analyze pictures')
+      return
+    }
+
+    setIsLoading(true)
+    setRecipe('')
+    setGroceryList([])
+    
+    try {
+      const result = await analyzeImageAndGenerateRecipe(
+        preview,
+        userApiKey,
+        true
+      )
+      setRecipe(result.recipe)
+      setGroceryList(result.groceryList)
+    } catch (error) {
+      console.error('Error in handleRerun:', error)
+      if (error instanceof Error && error.message.includes('API key')) {
+        alert('There was an issue with your API key. Please check it in your profile.')
+      } else {
+        alert(error instanceof Error ? error.message : 'An unknown error occurred. Please try again.')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const ResultsSection = () => (
-    <div className="grid gap-6 md:grid-cols-2 mt-6 auto-rows-fr">
-      <div className="h-full">
-        {recipe && <Recipe recipe={recipe} />}
-      </div>
-      <div className="h-full">
-        {groceryList.length > 0 && <GroceryList items={groceryList} />}
+    <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2 auto-rows-fr">
+        <div className="h-full">
+          {recipe && <Recipe recipe={recipe} />}
+        </div>
+        <div className="h-full">
+          {groceryList.length > 0 && <GroceryList items={groceryList} />}
+        </div>
       </div>
     </div>
   )
@@ -106,7 +143,12 @@ export default function Home() {
         </header>
 
         <div className="relative">
-          <ImageUpload onUpload={handleImageUpload} />
+          <ImageUpload 
+            onUpload={handleImageUpload}
+            preview={preview}
+            setPreview={setPreview}
+            setError={setError}
+          />
           {!session && (
             <div className="absolute inset-0 bg-black/5 backdrop-blur-[2px] flex items-center justify-center">
               <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -122,9 +164,20 @@ export default function Home() {
         </div>
 
         {isLoading && imageSource === 'upload' && (
-          <p className="text-center font-semibold">Analyzing image and generating recipe & grocery list...</p>
+          <p className="text-center font-semibold">
+            Analyzing image and generating recipe & grocery list...
+          </p>
         )}
-        {imageSource === 'upload' && (recipe || groceryList.length > 0) && <ResultsSection />}
+
+        {error && imageSource === 'upload' && (
+          <div className="mt-6 text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+          </div>
+        )}
+
+        {imageSource === 'upload' && !error && (recipe || groceryList.length > 0) && (
+          <ResultsSection />
+        )}
         
         <div className="mt-12">
           <h2 className="text-xl font-semibold mb-4">Try with Example Pictures</h2>

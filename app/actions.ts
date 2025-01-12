@@ -3,23 +3,28 @@
 import { Mistral } from '@mistralai/mistralai'
 
 export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKey?: string, isUserUpload: boolean = false) {
+  let client: Mistral
+
   // For user uploads, we must have a user API key
-  if (isUserUpload && !userApiKey) {
-    throw new Error('Please add your Mistral API key in your profile to analyze uploaded images')
-  }
-
-  // Use user's API key for uploads, environment key for examples
-  const apiKey = isUserUpload ? userApiKey : process.env.MISTRAL_API_KEY
-
-  if (!apiKey) {
-    throw new Error('No API key available')
+  if (isUserUpload) {
+    if (!userApiKey) {
+      throw new Error('Please add your Mistral API key in your profile to analyze uploaded images')
+    }
+    // Use only user's API key for uploads
+    client = new Mistral({
+      apiKey: userApiKey
+    })
+  } else {
+    // For example images, use environment API key
+    if (!process.env.MISTRAL_API_KEY) {
+      throw new Error('No API key available for examples')
+    }
+    client = new Mistral({
+      apiKey: process.env.MISTRAL_API_KEY
+    })
   }
 
   try {
-    const client = new Mistral({
-      apiKey: apiKey
-    })
-    
     const response = await client.chat.complete({
       model: "pixtral-12b",
       messages: [
@@ -80,8 +85,8 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     }
   } catch (error) {
     console.error('Error in analyzeImageAndGenerateRecipe:', error)
-    if (userApiKey) {
-      throw new Error('Failed to process with provided API key. Please check your API key.')
+    if (isUserUpload) {
+      throw new Error('Failed to process with your API key. Please check your API key.')
     }
     throw new Error('Failed to generate recipe. Please try again.')
   }
