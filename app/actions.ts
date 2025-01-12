@@ -75,14 +75,17 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     console.log(response.choices[0].message.content)
     // Clean and parse the JSON response
     const rawContent = response.choices[0].message.content
-      .replace(/```json\n/, '')  // Remove opening ```json
-      .replace(/\n```$/, '')     // Remove closing ```
-      .replace(/\\\s*/g, '')     // Remove escaped whitespace
-      .replace(/\\"/g, '"')      // Fix escaped quotes
-      .trim();                   // Remove leading/trailing whitespace
+      .replace(/^[\s\S]*?({[\s\S]*})[\s\S]*$/, '$1') // Extract JSON object
+      .trim();
     
     try {
       const content = JSON.parse(rawContent);
+      
+      // Validate the required fields exist
+      if (!content.recipe || !content.dishName || !content.groceryList) {
+        console.error('Missing required fields in JSON response:', content)
+        return { error: 'Invalid response format from AI model' }
+      }
       
       return {
         dishName: content.dishName,
@@ -93,7 +96,7 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
       }
     } catch (jsonError) {
       console.error('Error parsing JSON:', rawContent)
-      throw jsonError
+      return { error: 'Failed to parse AI response' }
     }
   } catch (error) {
     console.error('Error in analyzeImageAndGenerateRecipe:', error)
