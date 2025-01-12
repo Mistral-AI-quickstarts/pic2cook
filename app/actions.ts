@@ -22,7 +22,7 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     }
 
     const response = await client.chat.complete({
-      model: "pixtral-large-latest",
+      model: "pixtral-12b-2409",
       messages: [
         {
           role: 'user',
@@ -64,7 +64,11 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
       return { error: 'Failed to process image. Please make sure you have a valid API key and try again.' }
     })
 
-    if (!response || 'error' in response) {
+    if (!response) {
+      return { error: 'No response from AI model' }
+    }
+
+    if ('error' in response) {
       return response || { error: 'Failed to process image' }
     }
 

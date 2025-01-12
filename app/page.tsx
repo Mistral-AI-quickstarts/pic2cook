@@ -70,6 +70,11 @@ export default function Home() {
     try {
       // Pass false for isUserUpload to use environment API key
       const result = await analyzeImageAndGenerateRecipe(imageData, undefined, false)
+      if (!result) {
+        alert('Failed to get response from server')
+        return
+      }
+      
       console.log('API Response:', result);
       
       if ('error' in result) {
@@ -257,7 +262,7 @@ export default function Home() {
               >
                 Mistral AI
               </a>
-              {' '}Pixtral Large
+              {' '}Pixtral 12B
             </div>
             <div className="flex items-center justify-center gap-4">
               <a
