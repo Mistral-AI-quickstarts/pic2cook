@@ -1,95 +1,87 @@
 'use client'
 
-import { useState } from 'react'
-import { Upload, Camera } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { useDropzone } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
+import { useSession } from 'next-auth/react'
 
 interface ImageUploadProps {
   onUpload: (imageData: string) => void
 }
 
 export function ImageUpload({ onUpload }: ImageUploadProps) {
-  const [isDragging, setIsDragging] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
+  const { data: session } = useSession()
+  const hasApiKey = typeof window !== 'undefined' && !!localStorage.getItem('mistral_api_key')
 
-  const handleFile = (file: File) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      onUpload(reader.result as string)
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (!session || !hasApiKey) {
+      if (session && !hasApiKey) {
+        alert('Please add your Mistral API key in your profile to upload pictures')
+      }
+      return
     }
-    reader.readAsDataURL(file)
-  }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file && file.type.startsWith('image/')) {
-      handleFile(file)
+    const file = acceptedFiles[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64data = reader.result as string
+        setPreview(base64data)
+        onUpload(base64data)
+      }
+      reader.readAsDataURL(file)
     }
-  }
+  }, [onUpload, session, hasApiKey])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.webp']
+    },
+    maxFiles: 1,
+    disabled: !session
+  })
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Upload Your Food Picture</h2>
-      <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center ${
-          isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setIsDragging(true)
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className="p-4 bg-primary/10 rounded-full">
-            <Upload className="w-8 h-8 text-primary" />
-          </div>
-          <div>
-            <p className="text-lg font-medium">Drag and drop your food photo here</p>
-            <p className="text-sm text-gray-500 mt-1">or use one of these options</p>
-          </div>
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={() => document.getElementById('file-upload')?.click()}
-            >
-              Choose File
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => document.getElementById('camera-upload')?.click()}
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              Take Photo
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500">
-            Supports: JPG, PNG, WEBP • Max size: 5MB
-          </p>
+    <div
+      {...getRootProps()}
+      className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+        ${isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300'}
+        ${!session ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary hover:bg-primary/5'}`}
+    >
+      <input {...getInputProps()} />
+      <div className="space-y-4">
+        <div className="text-lg">
+          <p>Drop an image here, or click to select</p>
         </div>
-        <input
-          id="file-upload"
-          type="file"
-          className="hidden"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) handleFile(file)
+        {preview && (
+          <div className="mt-4">
+            <img
+              src={preview}
+              alt="Preview"
+              className="max-h-64 mx-auto rounded-lg"
+            />
+          </div>
+        )}
+        <Button
+          type="button"
+          disabled={!session}
+          className="mt-4"
+          onClick={(e) => {
+            e.stopPropagation()
+            if (!hasApiKey && session) {
+              alert('Please add your Mistral API key in your profile to upload pictures')
+              return
+            }
+            const input = document.querySelector('input[type="file"]')
+            if (input) {
+              input.click()
+            }
           }}
-        />
-        <input
-          id="camera-upload"
-          type="file"
-          className="hidden"
-          accept="image/*"
-          capture="environment"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) handleFile(file)
-          }}
-        />
+        >
+          Select Image
+        </Button>
       </div>
     </div>
   )
