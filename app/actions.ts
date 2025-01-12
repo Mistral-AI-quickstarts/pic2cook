@@ -27,7 +27,7 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
         {
           role: 'user',
           content: [
-            { type: 'text', text: `You are a helpful cooking assistant. Given an image or description of food, provide a dish name, recipe and grocery list in JSON format.
+            { type: 'text', text: `Analyze this food image and return ONLY a JSON object with no additional text. The JSON should have three keys:
         The response should be a valid JSON object with three main keys: "dishName", "recipe" and "groceryList".
         The dishName should be a string.
         The recipe should be one single string that's HTML formatted with clear sections for:
@@ -44,7 +44,8 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
           <li>Using a sharp knife, dice vegetables into uniform 1/2-inch pieces. Keep onions separate from other vegetables (8 minutes)</li>
           <li>Add oil to the hot pan and sauté onions until translucent and edges start to brown, stirring occasionally with a wooden spoon (5 minutes)</li>
           </ol><h2>Total Time: 15 minutes</h2>"
-        The groceryList should be an array of items needed, each including quantity (e.g., "2 cups rice", "3 cloves garlic", "1 large onion").` },
+        The groceryList should be an array of items needed, each including quantity (e.g., "2 cups rice", "3 cloves garlic", "1 large onion").
+        Return ONLY the JSON object with no additional text or explanation.` },
             { type: 'image_url', imageUrl: imageData }
           ],
         },
@@ -76,8 +77,8 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     const rawContent = response.choices[0].message.content
       .replace(/```json\n/, '')  // Remove opening ```json
       .replace(/\n```$/, '')     // Remove closing ```
-      .replace(/[\n\r\t]/g, ' ') // Remove newlines, carriage returns, tabs
-      .replace(/\s+/g, ' ')      // Replace multiple spaces with single space
+      .replace(/\\\s*/g, '')     // Remove escaped whitespace
+      .replace(/\\"/g, '"')      // Fix escaped quotes
       .trim();                   // Remove leading/trailing whitespace
     
     try {
