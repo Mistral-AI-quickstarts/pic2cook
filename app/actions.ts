@@ -5,26 +5,22 @@ import { Mistral } from '@mistralai/mistralai'
 export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKey?: string, isUserUpload: boolean = false) {
   let client: Mistral
 
-  // For user uploads, we must have a user API key
-  if (isUserUpload) {
-    if (!userApiKey) {
-      throw new Error('Please add your Mistral API key in your profile to analyze uploaded images')
-    }
-    // Use only user's API key for uploads
-    client = new Mistral({
-      apiKey: userApiKey
-    })
-  } else {
-    // For example images, use environment API key
-    if (!process.env.MISTRAL_API_KEY) {
-      throw new Error('No API key available for examples')
-    }
-    client = new Mistral({
-      apiKey: process.env.MISTRAL_API_KEY
-    })
-  }
-
   try {
+    if (isUserUpload) {
+      if (!userApiKey) {
+        return { error: 'Please add your Mistral API key in your profile to analyze uploaded images' }
+      }
+      if (!/^[a-zA-Z0-9]{32,}$/.test(userApiKey)) {
+        return { error: 'Invalid API key format. Please check your API key.' }
+      }
+      client = new Mistral({ apiKey: userApiKey })
+    } else {
+      if (!process.env.MISTRAL_API_KEY) {
+        return { error: 'No API key available for examples' }
+      }
+      client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
+    }
+
     const response = await client.chat.complete({
       model: "pixtral-12b",
       messages: [
@@ -54,10 +50,25 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
         },
       ],
       response_format: {type: 'json_object'},
+    }).catch(error => {
+      if (error.message?.includes('401') || error.message?.includes('authentication')) {
+        return { error: 'Invalid API key. Please check your API key in your profile.' }
+      }
+      if (error.message?.includes('403') || error.message?.includes('permission')) {
+        return { error: 'API key does not have permission. Please check your API key.' }
+      }
+      if (error.message?.includes('API key')) {
+        return { error: 'Invalid API key. Please check your API key in your profile.' }
+      }
+      return { error: 'Failed to process image. Please make sure you have a valid API key and try again.' }
     })
 
+    if (!response || 'error' in response) {
+      return response || { error: 'Failed to process image' }
+    }
+
     if (!response.choices) {
-      throw new Error('No response received from AI model')
+      return { error: 'No response received from AI model' }
     }
 
     console.log(response.choices[0].message.content)
@@ -85,10 +96,11 @@ export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKe
     }
   } catch (error) {
     console.error('Error in analyzeImageAndGenerateRecipe:', error)
-    if (isUserUpload) {
-      throw new Error('Failed to process with your API key. Please check your API key.')
+    return {
+      error: error instanceof Error && error.message.includes('API key')
+        ? error.message
+        : 'Failed to process image. Please try again.'
     }
-    throw new Error('Failed to generate recipe. Please try again.')
   }
 }
 

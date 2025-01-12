@@ -45,15 +45,18 @@ export default function Home() {
         userApiKey,
         true
       )
+      if ('error' in result) {
+        setError(result.error)
+        if (result.error.includes('API key')) {
+          localStorage.removeItem('mistral_api_key')
+        }
+        return
+      }
       setRecipe(result.recipe)
       setGroceryList(result.groceryList)
     } catch (error) {
       console.error('Error in handleImageUpload:', error)
-      if (error instanceof Error && error.message.includes('API key')) {
-        setError('There was an issue with your API key. Please check it in your profile.')
-      } else {
-        setError(error instanceof Error ? error.message : 'An unexpected error occurred')
-      }
+      setError('An unexpected error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }

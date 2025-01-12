@@ -50,7 +50,7 @@ function SignInContent() {
         window.location.href = '/'
       }
     } catch (error) {
-      setError('An unexpected error occurred. Please try again.')
+      setError('An unexpected error occurred. Please make sure you have a valid API key and try again.')
     } finally {
       setIsLoading(false)
     }
