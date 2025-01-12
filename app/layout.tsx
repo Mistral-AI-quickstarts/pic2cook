@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from './providers/AuthProvider'
+import { SpeedInsights } from "@vercel/speed-insights/next" 
 
 export const metadata: Metadata = {
   title: 'Pic2Cook - AI Recipe & Grocery List Generator',
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <SpeedInsights />
+        </AuthProvider>
       </body>
     </html>
   )
