@@ -2,24 +2,30 @@
 
 import { Mistral } from '@mistralai/mistralai'
 
-export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKey?: string, isUserUpload: boolean = false) {
-  let client: Mistral
+export interface RecipeResponse {
+  dishName: string
+  recipe: string
+  groceryList: string[]
+}
 
+export type ApiResponse = RecipeResponse | { error: string }
+
+export async function analyzeImageAndGenerateRecipe(imageData: string, userApiKey?: string, isUserUpload: boolean = false): Promise<ApiResponse> {
+  if (!isUserUpload) {
+    return { error: 'This function should only be used for user uploads' }
+  }
+
+  if (!userApiKey) {
+    return { error: 'Please add your Mistral API key in your profile to analyze uploaded images' }
+  }
+
+  if (!/^[a-zA-Z0-9]{32,}$/.test(userApiKey)) {
+    return { error: 'Invalid API key format. Please check your API key.' }
+  }
+
+  let client: Mistral
   try {
-    if (isUserUpload) {
-      if (!userApiKey) {
-        return { error: 'Please add your Mistral API key in your profile to analyze uploaded images' }
-      }
-      if (!/^[a-zA-Z0-9]{32,}$/.test(userApiKey)) {
-        return { error: 'Invalid API key format. Please check your API key.' }
-      }
-      client = new Mistral({ apiKey: userApiKey })
-    } else {
-      if (!process.env.MISTRAL_API_KEY) {
-        return { error: 'No API key available for examples' }
-      }
-      client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
-    }
+    client = new Mistral({ apiKey: userApiKey })
 
     const response = await client.chat.complete({
       model: "pixtral-12b-2409",
@@ -82,7 +88,7 @@ Provide your response using exactly these delimiters and formats. Make sure to u
     }
 
     const content = response.choices[0].message.content;
-    if (!content) {
+    if (!content || typeof content !== 'string') {
       return { error: 'Empty response from AI model' }
     }
 
@@ -102,10 +108,10 @@ Provide your response using exactly these delimiters and formats. Make sure to u
       const groceryList = groceryListMatch[1]
         .trim()
         .split('\n')
-        .map(item => item.trim())
-        .filter(item => item.length > 0);
+        .map((item: string) => item.trim())
+        .filter((item: string) => item.length > 0);
 
-      const result = {
+      const result: RecipeResponse = {
         dishName,
         recipe,
         groceryList
