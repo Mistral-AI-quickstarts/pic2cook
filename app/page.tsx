@@ -169,7 +169,7 @@ export default function Home() {
           />
           {!session && (
             <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/40 to-black/50 backdrop-blur-[1px] flex items-center justify-center p-4">
-              <div className="bg-white/95 p-5 rounded-xl shadow-xl text-center max-w-[320px] mx-auto backdrop-blur-xl border border-white/20">
+              <div className="bg-white/95 p-5 rounded-xl shadow-xl text-center max-w-[420px] mx-auto backdrop-blur-xl border border-white/20">
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold text-primary">Upload Your Own Pictures</h3>
