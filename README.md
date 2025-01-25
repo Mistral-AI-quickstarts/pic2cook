@@ -6,7 +6,7 @@ Pic2Cook analyzes food images using Mistral AI's Pixtral 12B model to generate s
 
 ## Try It 🌟
 
-Give Pic2Cook a try at [pic2cook.vercel.app](https://pic2cook.vercel.app/).
+Give Pic2Cook a try at [pic2cook.com](https://pic2cook.com/).
 
 - Try example images without signing up
 - Create an account to upload your own pictures
