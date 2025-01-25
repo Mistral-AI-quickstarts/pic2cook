@@ -2,7 +2,7 @@
 
 Pic2Cook analyzes food images using Mistral AI's Pixtral 12B model to generate step-by-step cooking instructions and shopping lists.
 
-![Pic2Cook Demo](public/demo.png)
+![Pic2Cook Demo](public/pic2cook.gif)
 
 ## Try It 🌟
 
