@@ -178,7 +178,7 @@ export default function Home() {
                     <ol className="text-left space-y-2 list-none text-sm">
                       {[
                         'Sign in to your account',
-                        'Add your Mistral API key',
+                        <span key="api-key">Add your Mistral API key <a href="https://console.mistral.ai/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">(get free key here)</a></span>,
                         'Start uploading pictures!'
                       ].map((step, i) => (
                         <li key={i} className="flex items-center gap-2">
