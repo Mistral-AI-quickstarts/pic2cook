@@ -15,12 +15,38 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
   },
   experimental: {
+    optimizePackageImports: [
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-label',
+      '@radix-ui/react-menubar',
+      '@radix-ui/react-select',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-toast',
+      'lucide-react',
+    ],
     webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+    parallelServerBuildTraces: true,
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  poweredByHeader: false,
+  reactStrictMode: true,
+  compress: true,
 }
 
 mergeConfig(nextConfig, userConfig)
